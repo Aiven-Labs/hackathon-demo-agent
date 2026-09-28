@@ -1,5 +1,9 @@
 Agent Black Box
 
+Original project code is licensed under the MIT License; see LICENSE.
+The OpenTelemetry-derived SQL below remains under Apache License 2.0;
+see LICENSES/Apache-2.0.txt for the full license text.
+
 clickhouse/schema.sql adapts SQL templates from OpenTelemetry Collector Contrib v0.161.0
 https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v0.161.0/exporter/clickhouseexporter/internal/sqltemplates
 Copyright The OpenTelemetry Authors. Licensed under Apache License 2.0.
