@@ -1,6 +1,6 @@
 # Agent Black Box — hackathon starter
 
-A fictional Paris travel agent with three deliberate failures, ready for the **Agent Black Box** challenge. Build the investigation feature; this repo supplies the agent, reproducible scenarios and telemetry pipeline.
+This repo supplies the agent, reproducible scenarios and telemetry pipeline: A fictional Paris travel agent with three deliberate failures.
 
 ```text
 Aiven Runtime — one container
@@ -11,11 +11,9 @@ Aiven Runtime — one container
                         traces · logs · metrics
 ```
 
-No SigNoz, organiser-hosted endpoint, Runtime log scraping, model API key, or local Docker installation is required for the Aiven setup.
-
 ## Start here
 
-You need **Python 3.10+**, **Git**, a GitHub account, and an **Aiven account/project with credits and permission to create services**. Organisers only distribute the challenge brief, this repository and credits.
+You need **Python 3.10+**, **Git**, a GitHub account, and an **Aiven account/project with credits and permission to create services**. No model API key or local Docker installation are required to use this repo.
 
 1. **Fork this repository** into your GitHub account, then clone your fork and enter its directory. You will deploy your own changes from this fork.
 2. In [Aiven Console](https://console.aiven.io/), create/select your project. Under **Runtime → Deploy application**, connect your GitHub account and grant access to the fork. Stop before creating an application: the script creates both services. For a GitHub organisation, connecting its account may require an organisation owner.
@@ -31,7 +29,7 @@ You need **Python 3.10+**, **Git**, a GitHub account, and an **Aiven account/pro
 5. Let the script finish. It creates a dedicated **single-shard ClickHouse service**, creates the database, deploys the **agent + Collector** to Runtime, automatically creates the telemetry tables, then checks all three scenarios end to end.
 6. Open the printed URL. Username: **`demo`**. Your generated password is in **`.deployment.json`** (or Runtime's `DEMO_PASSWORD` secret). This local file is private and Git-ignored; do not share it.
 
-Provisioning/build time varies; allow time before the event. Do not infer readiness from `RUNNING` alone: the script waits for the correct application version and actual telemetry in ClickHouse.
+Provisioning/build time may vary. Do not infer readiness from `RUNNING` alone: the script waits for the correct application version and actual telemetry in ClickHouse.
 
 If interrupted, run `python3 setup.py` again from the same clone to resume. Keep `.deployment.json`: it identifies resources owned by this setup. A name collision without matching local state stops safely; `--name team-two` chooses fresh names.
 
@@ -123,4 +121,4 @@ This is a **single-replica hackathon foundation**, not a production service. It 
 
 **Services continue to consume credits after you close your terminal.** In Aiven Console, stop or delete the two services recorded in `.deployment.json` (default `blackbox-app` and `blackbox-ch`) when finished. Deleting ClickHouse deletes the stored demo telemetry. The setup script never deletes services automatically.
 
-Implementation and validation evidence: [VALIDATION.md](VALIDATION.md). License: Apache-2.0; upstream SQL attribution is in [NOTICE](NOTICE).
+Implementation and validation evidence: [VALIDATION.md](VALIDATION.md). License: MIT; upstream SQL attribution is in [NOTICE](NOTICE).
