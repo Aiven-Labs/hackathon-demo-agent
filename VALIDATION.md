@@ -28,11 +28,15 @@ Also passed on 2026-09-28:
 - Runtime built GitHub commit `16c8a1b` and started the agent + Collector together on the 1 GiB plan.
 - `setup.py` discovered the GitHub integration, created the Runtime service, injected connection settings, waited for the correct application version, and completed verification.
 - All six faulty/reference runs from **Runtime** produced stored traces, correlated logs and metrics in **Aiven ClickHouse**.
-- GitHub Actions unit/evaluation job passed.
+- Redeployment of code commit `4ddef89` passed the same six live checks using `setup.py redeploy`.
+- All five participant SQL examples executed successfully against stored Aiven telemetry.
+- Both GitHub Actions jobs passed: unit/evaluation checks and full Docker Compose integration with a real local ClickHouse instance.
 
 The ClickHouse service/database was created with the same API implementation during the preceding ingestion proof, then resumed by the full setup script. The flow was not tested with a brand-new Aiven account or GitHub connection.
 
-Still to validate: the optional local Compose integration job after fixing its initial connection-reset readiness handling. The primary Runtime → Aiven ClickHouse path passed independently.
+The initial local Compose check exposed a startup connection-reset race. The readiness loop now tolerates both socket errors and incomplete HTTP connections while the application starts. The corrected [CI run](https://github.com/Aiven-Labs/hackathon-demo-agent/actions/runs/36408489720) passed.
+
+Remaining limits: no live model-provider test, no new-account onboarding rehearsal, no concurrent/load test, and no long-running durability test. The checked path is the deterministic hackathon starter, not a production observability platform.
 
 ## Version choices
 
