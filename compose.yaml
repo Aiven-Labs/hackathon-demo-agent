@@ -1,0 +1,30 @@
+# Optional local preview. Aiven deployment uses setup.py and the Dockerfile.
+services:
+  demo:
+    build: .
+    ports: ["127.0.0.1:8080:8080"]
+    environment:
+      LOCAL_DEVELOPMENT: "true"
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_DATABASE: blackbox
+      CLICKHOUSE_USER: demo
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:?Set CLICKHOUSE_PASSWORD in .env}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:?Set DEMO_PASSWORD in .env}
+      AGENT_VERSION: local-worktree
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.8
+    environment:
+      CLICKHOUSE_DB: blackbox
+      CLICKHOUSE_USER: demo
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:?Set CLICKHOUSE_PASSWORD in .env}
+    volumes: ["clickhouse-data:/var/lib/clickhouse"]
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 3s
+      timeout: 2s
+      retries: 30
+volumes:
+  clickhouse-data:

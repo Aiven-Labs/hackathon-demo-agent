@@ -1,0 +1,4 @@
+[
+  {"id":"dev-evening","venue_id":"atelier-lumiere-demo","arrival_hour":19,"walk_minutes":12,"truth_open_from":10,"truth_open_until":17},
+  {"id":"dev-afternoon","venue_id":"atelier-lumiere-demo","arrival_hour":14,"walk_minutes":8,"truth_open_from":10,"truth_open_until":17}
+]

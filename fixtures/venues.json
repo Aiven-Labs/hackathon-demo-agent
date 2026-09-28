@@ -1,0 +1,6 @@
+[
+  {"id":"atelier-lumiere-demo","name":"Atelier Lumière (fictional)","version":1,"updated_at":"2025-01-01T00:00:00Z","open_from":10,"open_until":22},
+  {"id":"atelier-lumiere-demo","name":"Atelier Lumière (fictional)","version":2,"updated_at":"2026-09-01T00:00:00Z","open_from":10,"open_until":17},
+  {"id":"jardin-des-idees-demo","name":"Jardin des Idées (fictional)","version":1,"updated_at":"2025-01-01T00:00:00Z","open_from":8,"open_until":23},
+  {"id":"jardin-des-idees-demo","name":"Jardin des Idées (fictional)","version":2,"updated_at":"2026-09-01T00:00:00Z","open_from":9,"open_until":18}
+]

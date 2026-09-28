@@ -1,0 +1,6 @@
+Agent Black Box
+
+clickhouse/schema.sql adapts SQL templates from OpenTelemetry Collector Contrib v0.161.0
+https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/v0.161.0/exporter/clickhouseexporter/internal/sqltemplates
+Copyright The OpenTelemetry Authors. Licensed under Apache License 2.0.
+Changes: fixed identifiers, seven-day retention, bloom-filter log indexes, externally managed database.

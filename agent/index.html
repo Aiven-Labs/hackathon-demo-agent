@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Black Box · Demo runner</title>
+<style>body{font:17px system-ui;max-width:850px;margin:60px auto;padding:0 24px;color:#172b4d;background:#f7f9fc}h1{font-size:38px}label{display:block;margin:18px 0 6px}select,button{font:inherit;padding:12px;border:1px solid #b8c7dd;border-radius:8px}button{background:#215fe5;color:white;cursor:pointer;margin:20px 8px 0 0}button:disabled{opacity:.5}pre{background:white;border:1px solid #d6dfed;padding:20px;white-space:pre-wrap;overflow-wrap:anywhere;border-radius:10px}small{color:#52627b}</style>
+<h1>Agent Black Box</h1><p>A fictional Paris agent with deliberately unreliable behaviour. Run a scenario, follow its trace ID, and build your investigation capability.</p>
+<small>Tools and venue data are simulated. The result explicitly identifies deterministic or live-model mode. Nothing makes a real reservation.</small>
+<label for="scenario">Scenario</label><select id="scenario"><option value="retry_spiral">Retry spiral</option><option value="stale_source">Stale source</option><option value="silent_failure">Silent failure</option></select>
+<label for="profile">Configuration</label><select id="profile"><option value="baseline">Baseline — deliberately faulty</option><option value="reference">Reference fix — comparison example</option></select><br>
+<button id="run">Run agent</button><button id="evidence" disabled>Check stored evidence</button>
+<p id="status" role="status">Start with the baseline. ClickHouse ingestion may take a few seconds.</p><pre id="output">Your run result will appear here.</pre>
+<script>
+let trace; const status=document.getElementById('status'), output=document.getElementById('output'), run=document.getElementById('run'), evidence=document.getElementById('evidence');
+async function call(path, options={}){const response=await fetch(path,options);const data=await response.json();if(!response.ok)throw Error(data.detail||'Request failed');return data;}
+run.onclick=async()=>{run.disabled=true;evidence.disabled=true;status.textContent='Running…';try{const data=await call('/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({scenario:document.getElementById('scenario').value,profile:document.getElementById('profile').value})});trace=data.trace_id;output.textContent=JSON.stringify(data,null,2);status.textContent='Run complete. Check that its evidence reached ClickHouse.';evidence.disabled=false;}catch(e){status.textContent=e.message;}finally{run.disabled=false;}};
+evidence.onclick=async()=>{try{const data=await call('/evidence/'+trace);output.textContent=JSON.stringify(data,null,2);status.textContent=data.traces.length&&data.logs.length?'Correlated traces and logs found. Metrics are aggregate counters.':'Still waiting for ingestion; try again in a few seconds.';}catch(e){status.textContent=e.message;}};
+</script></html>

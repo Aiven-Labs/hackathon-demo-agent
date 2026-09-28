@@ -1,0 +1,4 @@
+[
+  {"id":"test-evening","venue_id":"jardin-des-idees-demo","arrival_hour":20,"walk_minutes":18,"truth_open_from":9,"truth_open_until":18},
+  {"id":"test-afternoon","venue_id":"jardin-des-idees-demo","arrival_hour":15,"walk_minutes":10,"truth_open_from":9,"truth_open_until":18}
+]

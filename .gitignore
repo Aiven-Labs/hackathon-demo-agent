@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+.env.*
+!.env.example
+.deployment.json
+.local-password
+reports/
+*.pem
+*.log
+.DS_Store
