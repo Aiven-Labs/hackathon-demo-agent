@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS "blackbox"."otel_traces_trace_id_ts"  (
     TTL Start + INTERVAL 7 DAY
     SETTINGS index_granularity=8192, ttl_only_drop_parts = 1;
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS "blackbox"."otel_traces_trace_id_ts_mv" 
+CREATE MATERIALIZED VIEW IF NOT EXISTS "blackbox"."otel_traces_trace_id_ts_mv"
 TO "blackbox"."otel_traces_trace_id_ts"
 AS SELECT
               TraceId,

@@ -101,7 +101,8 @@ class Agent:
         task = task or load_tasks()[0]
         policy = POLICIES[profile]
         run_id = str(uuid.uuid4())
-        config = asdict(policy)
+        config = {**asdict(policy), "mode": self.mode,
+                  "model": os.getenv("MODEL_NAME", "unspecified") if self.mode == "live" else "scripted-fixture-v1"}
         attrs = {"agent.run_id": run_id, "agent.scenario": scenario, "agent.profile": profile,
                  "agent.task_id": task["id"], "agent.config_hash": hashlib.sha256(
                      json.dumps(config, sort_keys=True).encode()).hexdigest()[:16],

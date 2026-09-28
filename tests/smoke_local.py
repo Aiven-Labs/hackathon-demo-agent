@@ -1,8 +1,19 @@
 """Container integration test, including real Collector writes to real ClickHouse."""
 import base64
 import json
+import http.client
+import sys
 import time
 from urllib import request, error
+
+
+def report_failure(kind, value, traceback):
+    message = str(value).replace("%", "%25").replace("\n", "%0A").replace("\r", "%0D")
+    print("::error::Container verification: " + kind.__name__ + ": " + message, flush=True)
+    sys.__excepthook__(kind, value, traceback)
+
+
+sys.excepthook = report_failure
 
 
 def call(path, body=None):
@@ -16,7 +27,7 @@ for attempt in range(120):
     try:
         call("/healthz")
         break
-    except (error.URLError, TimeoutError):
+    except (OSError, http.client.HTTPException):
         time.sleep(2)
 else:
     raise RuntimeError("Container did not become ready")

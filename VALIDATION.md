@@ -23,7 +23,16 @@ Validated on 2026-09-28 against a dedicated Aiven ClickHouse service:
 - Example stored signal tables included 46 spans and 29 log records after the six-run check; metric counters and histograms were also populated.
 - Collector TLS must retain system roots when adding the Aiven project CA (`include_system_ca_certs_pool: true`), because the service HTTPS certificate can use a public CA.
 
-Still to validate: Runtime container build/deployment, the complete setup flow from GitHub, and the GitHub Actions local Compose integration job. The preceding test used a local native Collector and Python application with real Aiven ClickHouse.
+Also passed on 2026-09-28:
+
+- Runtime built GitHub commit `16c8a1b` and started the agent + Collector together on the 1 GiB plan.
+- `setup.py` discovered the GitHub integration, created the Runtime service, injected connection settings, waited for the correct application version, and completed verification.
+- All six faulty/reference runs from **Runtime** produced stored traces, correlated logs and metrics in **Aiven ClickHouse**.
+- GitHub Actions unit/evaluation job passed.
+
+The ClickHouse service/database was created with the same API implementation during the preceding ingestion proof, then resumed by the full setup script. The flow was not tested with a brand-new Aiven account or GitHub connection.
+
+Still to validate: the optional local Compose integration job after fixing its initial connection-reset readiness handling. The primary Runtime → Aiven ClickHouse path passed independently.
 
 ## Version choices
 

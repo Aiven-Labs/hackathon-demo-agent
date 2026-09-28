@@ -55,7 +55,7 @@ class ClickHouse:
         for name, sql in {
             "traces": f"SELECT SpanName, SpanId, ParentSpanId, Duration, StatusCode, SpanAttributes FROM otel_traces WHERE TraceId = '{trace_id}' ORDER BY Timestamp",
             "logs": f"SELECT Timestamp, SpanId, Body, LogAttributes FROM otel_logs WHERE TraceId = '{trace_id}' ORDER BY Timestamp",
-            "metrics": "SELECT MetricName, Attributes, Value FROM otel_metrics_sum WHERE ServiceName = 'hackathon-demo-agent' AND TimeUnix > now() - INTERVAL 5 MINUTE ORDER BY TimeUnix DESC LIMIT 30",
+            "metrics": "SELECT MetricName, Attributes, Value FROM otel_metrics_sum WHERE ServiceName = 'hackathon-demo-agent' AND MetricName = 'agent.runs' AND TimeUnix > now() - INTERVAL 5 MINUTE ORDER BY TimeUnix DESC LIMIT 30",
         }.items():
             result[name] = json.loads(self.query(sql + " FORMAT JSON"))["data"]
         result["metrics_note"] = "Recent aggregate counters, not per-trace metrics. Use root span attributes for run-level results."
