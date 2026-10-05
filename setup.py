@@ -128,10 +128,40 @@ def connection(service):
     if not components:
         raise RuntimeError("No reachable ClickHouse HTTPS endpoint; check service networking")
     c = components[0]
-    user = next(u for u in service["users"] if u["username"] == "avnadmin")
     return {"CLICKHOUSE_URL": f'https://{c["host"]}:{c["port"]}',
-            "CLICKHOUSE_USER": user["username"], "CLICKHOUSE_PASSWORD": user["password"],
             "CLICKHOUSE_DATABASE": "blackbox"}
+
+
+def clickhouse_integration(source):
+    # The integration's port is native, not HTTPS. Keep the HTTPS endpoint and
+    # our explicitly provisioned blackbox database separate from those defaults.
+    keys = {"host": "CLICKHOUSE_HOST", "port": "CLICKHOUSE_NATIVE_PORT",
+            "user": "CLICKHOUSE_USER", "password": "CLICKHOUSE_PASSWORD",
+            "database": "CLICKHOUSE_SERVICE_DATABASE", "secure": "CLICKHOUSE_SECURE"}
+    return {"integration_type": "application_service_credential", "source_service": source,
+            "user_config": {"service_type": "clickhouse", "exposed_values": {
+                field: {"environment_variable_key": key} for field, key in keys.items()}}}
+
+
+def require_clickhouse_integration(api, project):
+    types = api.call("GET", f"/project/{segment(project)}/integration_types")["integration_types"]
+    if not any(t["integration_type"] == "application_service_credential" and
+               "clickhouse" in t.get("source_service_types", []) for t in types):
+        raise RuntimeError("ClickHouse service integration is not available in this project. Contact Aiven support before deploying.")
+
+
+def ensure_clickhouse_integration(api, project, source, destination):
+    expected = clickhouse_integration(source)
+    base = f"/project/{segment(project)}"
+    integrations = api.call("GET", base + f"/service/{segment(destination)}/integration")["service_integrations"]
+    for integration in integrations:
+        if (integration.get("enabled") and integration.get("integration_type") == expected["integration_type"]
+                and integration.get("source_service") == source and integration.get("dest_service") == destination):
+            if integration.get("user_config") != expected["user_config"]:
+                raise RuntimeError("Existing ClickHouse integration uses different variable mappings. Check Connected services in Runtime before retrying.")
+            return
+    # Disabled entries in this API are available connections, not existing integrations.
+    api.call("POST", base + "/integration", dict(expected, dest_service=destination))
 
 
 def app_call(url, password, path, body=None):
@@ -184,6 +214,7 @@ def deploy(api, args, state):
     if not remote or remote.split()[0] != sha:
         raise RuntimeError("Push this branch first so Runtime builds the same code you are reviewing")
     source = resolve_source(api, project, repository, branch)
+    require_clickhouse_integration(api, project)
     path = "/project/" + segment(project) + "/service"
     catalog = api.call("GET", "/project/" + segment(project) + "/service_types")["service_types"]
     cloud = state.get("cloud") or args.cloud
@@ -223,16 +254,20 @@ def deploy(api, args, state):
     env["CLICKHOUSE_CA_BASE64"] = base64.b64encode(certificate.encode()).decode()
     env.update(DEMO_PASSWORD=state["demo_password"], AGENT_VERSION=sha, MODEL_MODE="deterministic")
     # The cloud application bootstraps tables: no local DB access, SDK, Docker or CA setup needed.
-    variables = [{"key": key, "value": value, "kind": "secret" if key in ("CLICKHOUSE_PASSWORD", "DEMO_PASSWORD", "CLICKHOUSE_CA_BASE64") else "variable"} for key, value in env.items()]
+    variables = [{"key": key, "value": value, "kind": "secret" if key in ("DEMO_PASSWORD", "CLICKHOUSE_CA_BASE64") else "variable"} for key, value in env.items()]
     app_path = path + "/" + app_name
     config = {"application": {"source": source, "ports": [{"name": "http", "port": 8080, "protocol": "HTTP"}], "environment_variables": variables}}
     if app_name not in state["created"]:
         api.call("POST", path, {"service_name": app_name, "service_type": "application", "plan": ap["service_plan"], "cloud": cloud,
-                                "project_vpc_id": None, "user_config": config})
+                                "project_vpc_id": None, "user_config": config,
+                                "service_integrations": [clickhouse_integration(ch_name)]})
         state["created"].append(app_name)
         save(state)
-    elif args.action == "redeploy":
+    else:
+        # Also reconcile interrupted deployments and starters created before integrations.
+        # Remove manually copied credentials before the integration owns these keys.
         api.call("PUT", app_path, {"user_config": config})
+        ensure_clickhouse_integration(api, project, ch_name, app_name)
         api.call("POST", app_path + "/application/redeploy", {})
     wait_service(api, app_path)
     deadline = time.monotonic() + 1200

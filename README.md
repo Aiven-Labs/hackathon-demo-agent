@@ -26,8 +26,10 @@ You need **Python 3.10+**, **Git**, a GitHub account, and an **Aiven account/pro
 
    Enter your project name and token when prompted. The token input is hidden and is never stored or sent into Runtime. The script discovers available service plans, displays a cost estimate, and asks before creating them. Default region: `aws-eu-west-1`; choose another with `--cloud`.
 
-5. Let the script finish. It creates a dedicated **single-shard ClickHouse service**, creates the database, deploys the **agent + Collector** to Runtime, automatically creates the telemetry tables, then checks all three scenarios end to end.
-6. Open the printed URL. Username: **`demo`**. Your generated password is in **`.deployment.json`** (or Runtime's `DEMO_PASSWORD` secret). This local file is private and Git-ignored; do not share it.
+5. Let the script finish. It creates a dedicated **single-shard ClickHouse service**, creates the database, connects ClickHouse through Runtime’s **service integration**, deploys the **agent + Collector** to Runtime, automatically creates the telemetry tables, then checks all three scenarios end to end.
+   Runtime supplies the ClickHouse credentials through the integration. The script configures the HTTPS endpoint and `blackbox` database automatically; no connection details need to be copied.
+
+6. Open the printed URL in Chrome, Safari or Firefox. Username: **`demo`**. Your generated password is in **`.deployment.json`** (or Runtime's `DEMO_PASSWORD` secret). This local file is private and Git-ignored; do not share it.
 
 Provisioning/build time may vary. Do not infer readiness from `RUNNING` alone: the script waits for the correct application version and actual telemetry in ClickHouse.
 
@@ -108,6 +110,7 @@ This starter records only bundled fictional inputs. If you add customer data, ad
 | --- | --- |
 | Aiven 401 | Create a fresh token and rerun setup. |
 | Aiven 403 | Check project write permissions, credits and service availability. |
+| ClickHouse integration unavailable | Check that your project supports ClickHouse under Runtime’s Connected services, or contact an on-site mentor. |
 | Repository not connected | Grant Runtime's GitHub connection access to your fork, in the same Aiven organisation as your project. Rerun. |
 | Dirty/unpushed branch | Commit and push before deployment; `.deployment.json` and local secrets must remain ignored. |
 | Name already exists | Use the original `.deployment.json` to resume, or choose another `--name`. Existing resources are never adopted blindly. |
@@ -117,7 +120,7 @@ This starter records only bundled fictional inputs. If you add customer data, ad
 
 ## Limits and cleanup
 
-This is a **single-replica hackathon foundation**, not a production service. It uses a dedicated service's administrator credentials for schema bootstrap and reads/writes, shared demo authentication, an in-memory Collector queue, and one active run at a time. Abrupt shutdowns can lose buffered telemetry; retries can duplicate it. Add least-privilege credentials, tenant isolation, durable buffering, retention/deletion policy, load testing and representative evaluations before production use. No filesystem state in Runtime is treated as durable. Generated code execution/sandboxing is outside this starter.
+This is a **single-replica hackathon foundation**, not a production service. It uses a dedicated service's credentials supplied by the Runtime integration for schema bootstrap and reads/writes, shared demo authentication, an in-memory Collector queue, and one active run at a time. Abrupt shutdowns can lose buffered telemetry; retries can duplicate it. Add least-privilege credentials, tenant isolation, durable buffering, retention/deletion policy, load testing and representative evaluations before production use. No filesystem state in Runtime is treated as durable. Generated code execution/sandboxing is outside this starter.
 
 **Services continue to consume credits after you close your terminal.** In Aiven Console, stop or delete the two services recorded in `.deployment.json` (default `blackbox-app` and `blackbox-ch`) when finished. Deleting ClickHouse deletes the stored demo telemetry. The setup script never deletes services automatically.
 
