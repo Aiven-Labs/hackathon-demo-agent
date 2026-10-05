@@ -1,6 +1,6 @@
 # Agent Black Box — hackathon starter
 
-This repo supplies the agent, reproducible scenarios and telemetry pipeline: A fictional Paris travel agent with three deliberate failures.
+This repo supplies the agent (a fictional Paris travel agent), three reproducible scenarios and the initial telemetry pipeline.
 
 ```text
 Aiven Runtime — one container
